@@ -6,6 +6,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use App\Controller\UserCreateAction;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
@@ -14,18 +15,18 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     collectionOperations: [
         'get',
-        'createUser'=>[
-            'method'=>'post',
-            'path'=>'/users/my',
-            'controller'=>UserCreateAction::class
+        'createUser' => [
+            'method' => 'post',
+            'path' => '/users/my',
+            'controller' => UserCreateAction::class,
         ]
     ],
     itemOperations: ['delete', 'get'],
 
-    denormalizationContext: ['groups'=>['user:write']],
-    normalizationContext: ['groups'=>['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
+    normalizationContext: ['groups' => ['user:read']],
 )]
-class User
+class User implements PasswordAuthenticatedUserInterface
 {
     /**
      * @ORM\Id
@@ -33,19 +34,19 @@ class User
      * @ORM\Column(type="integer")
      */
     #[Groups(['user:read'])]
-    private $id;
+    private string $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    #[Groups(['user:write','user:read'])]
-    private $email;
+    #[Groups(['user:write', 'user:read'])]
+    private string $email;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
     #[Groups(['user:write'])]
-    private $password;
+    private string $password;
 
     public function getId(): ?int
     {
