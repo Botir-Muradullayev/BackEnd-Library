@@ -5,13 +5,16 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Component\User\FullNameDto;
 use App\Controller\UserCreateAction;
+use App\Controller\UserFullNameAction;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @method string getUserIdentifier()
  */
 #[ApiResource(
     collectionOperations: [
@@ -21,18 +24,22 @@ use Symfony\Component\Serializer\Annotation\Groups;
             'path' => '/users/my',
             'controller' => UserCreateAction::class,
         ],
-        'fullName'=>[
-            'method'=>'post',
-            'path'=>'/users/full-name',
-            'input'=>FullNameDto::class,
+        'fullName' => [
+            'method' => 'post',
+            'path' => '/users/full-name',
+            'input' => FullNameDto::class,
+            'controller' => UserFullNameAction::class,
+        ],
+        'auth' => [
+            'method' => 'post',
+            'path' => '/users/auth',
         ]
     ],
     itemOperations: ['delete', 'get'],
-
     denormalizationContext: ['groups' => ['user:write']],
     normalizationContext: ['groups' => ['user:read']],
 )]
-class User implements PasswordAuthenticatedUserInterface
+class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     /**
      * @ORM\Id
@@ -81,5 +88,28 @@ class User implements PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
+    }
+
+    public function getRoles():array
+    {
+        return ['ROlE_USER'];
+    }
+
+        public function getSalt()
+    {
+    }
+
+    public function eraseCredentials()
+    {
+    }
+
+    public function getUsername():string
+    {
+        return $this->getEmail();
+    }
+
+    public function __call(string $name, array $arguments)
+    {
+        // TODO: Implement @method string getUserIdentifier()
     }
 }
